@@ -4,7 +4,7 @@ import { messages } from "../utils/messages.js";
 import { statusCodes } from "../utils/statusCodes.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 dotenv.config();
 const create_user = async (req, res) => {
