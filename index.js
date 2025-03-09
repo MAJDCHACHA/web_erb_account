@@ -20,8 +20,7 @@ import accountRoutes from './routes/accountRoutes.js'
 // import userRoutes from './routes/userRoutes.js'
 const app=express();
 dotenv.config();
-const PORT=process.env.PORT;
-const HOST=process.env.HOST
+const PORT=process.env.PORT||3000;
 // middleware
 app.use(express.json());
 app.use(cors());
@@ -38,7 +37,7 @@ app.get('/',(req, res) =>{
 })
 connectDB().then(() => {
     app.listen(PORT,HOST, () => {
-        console.log(`http://${HOST}:${PORT}`);
+        console.log(`server running in port :${PORT}`);
     });
 }).catch(err => {
     console.error("Failed to start server:", err);
