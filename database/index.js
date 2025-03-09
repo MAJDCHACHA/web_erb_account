@@ -13,12 +13,7 @@ export const connectDB = async () => {
     }
 
     try {
-        await mongoose.connect(MONGO_URI, {
-            dbName: MONGO_DB,
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-
+        await mongoose.connect(MONGO_URI, { dbName: MONGO_DB });
         console.log(`MongoDB connected to "${MONGO_DB}" in ${NODE_ENV || "unknown"} mode`);
     } catch (error) {
         console.error("MongoDB Connection Error:", error);

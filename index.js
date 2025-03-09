@@ -36,7 +36,7 @@ app.get('/',(req, res) =>{
     res.send('hello world');
 })
 connectDB().then(() => {
-    app.listen(PORT,HOST, () => {
+    app.listen(PORT, () => {
         console.log(`server running in port :${PORT}`);
     });
 }).catch(err => {
