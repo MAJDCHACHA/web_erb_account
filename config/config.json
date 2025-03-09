@@ -1,0 +1,30 @@
+{
+    "development":{
+        "user":"",
+        "password":"",
+        "host":"localhost",
+        "database":"api",
+        "port":27017,
+        "uri":"mongodb://localhost:27017/api",
+        "dialect":"mongodb"
+    },
+    "production":{
+        "user":"my_user",
+        "password":"my_password",
+        "host":"${{RAILWAY_PRIVATE_DOMAIN}}",
+        "database":"my_database",
+        "port":27017,
+        "uri":"mongodb://${{MONGO_INITDB_ROOT_USERNAME}}:${{MONGO_INITDB_ROOT_PASSWORD}}@${{RAILWAY_PRIVATE_DOMAIN}}:27017",
+        "dialect":"mongodb"
+    },
+    "test":{
+        "user":"my_user",
+        "password":"my_password",
+        "host":"localhost",
+        "database":"my_database",
+        "port":3000,
+        "uri":"http://localhost:3000",
+        "dialect":"dialect"
+
+    }
+}

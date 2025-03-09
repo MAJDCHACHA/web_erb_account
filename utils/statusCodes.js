@@ -1,0 +1,15 @@
+export const statusCodes = {
+    SUCCESS: 200,
+    CREATED: 201,
+    NO_CONTENT:203,
+    BAD_REQUEST: 400,
+    EXISTS:401,
+    UNAUTHORIZED: 401,
+    LOGOUT:402,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    TWO_MANY:429,
+    INTERNAL_SERVER_ERROR: 500,
+
+  };
+  
