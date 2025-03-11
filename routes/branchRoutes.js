@@ -1,6 +1,8 @@
 import express from 'express';
 import branchControllers from "../controllers/branchControllers.js";
+import verify from '../middleware/verify.js';
 const router =express.Router();
+router.use(verify);
 router.route("/add").post(branchControllers.create_branch);
 router.route("/get").get(branchControllers.get_branch);
 router.route("/edit").put(branchControllers.update_branch);

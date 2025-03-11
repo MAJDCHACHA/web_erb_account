@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from 'dotenv'
 import cors from 'cors';
-// import corsOptions from "./config/corsOrigin.js";
+import corsOption from "./config/corsOrigin.js";
 // // *
 // import { helmetMiddleware } from "./security/helmet.js";
 // // *
@@ -16,14 +16,14 @@ import permissionRoutes from "./routes/permissionRoutes.js";
 import branchRoutes from  './routes/branchRoutes.js'
 import customerRoutes from './routes/customerRoutes.js'
 import accountRoutes from './routes/accountRoutes.js'
-// 
+// https://weberbaccount-production.up.railway.app
 // import userRoutes from './routes/userRoutes.js'
 const app=express();
 dotenv.config();
 const PORT=process.env.PORT||3000;
 // middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOption));
 // app.use(helmetMiddleware);
 // app.use(morganMiddleware);
 // app.use([databaseErrorHandler,errorHandler]);
