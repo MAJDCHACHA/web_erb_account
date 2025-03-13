@@ -15,9 +15,10 @@
 // }
 // export default corsOption;
 const corsOption = {
-    origin: "*",  
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-requested-with", "Accept"],
-    credentials: true,
-  };
+  origin: "*", // السماح لجميع المواقع
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-requested-with", "Accept"],
+  credentials: true,
+};
+
 export default corsOption;

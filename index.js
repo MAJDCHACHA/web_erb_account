@@ -17,12 +17,12 @@ import branchRoutes from  './routes/branchRoutes.js'
 import customerRoutes from './routes/customerRoutes.js'
 import accountRoutes from './routes/accountRoutes.js'
 // https://weberbaccount-production.up.railway.app
-// import userRoutes from './routes/userRoutes.js'
 const app=express();
 dotenv.config();
 const PORT=process.env.PORT||3000;
 // middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOption));
 // app.use(helmetMiddleware);
 // app.use(morganMiddleware);
