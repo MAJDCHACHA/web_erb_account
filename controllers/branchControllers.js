@@ -34,7 +34,7 @@ const get_branch=async(req,res)=>{
 const update_branch=async(req,res)=>{
     try{
         const {name,location,id}=req.body;
-        if(!name|| !direct || !id){
+        if(!name|| !location || !id){
             return res.status(statusCodes.BAD_REQUEST).json({message:messages.BAD_REQUEST});
         }
         const findAndUpdate=await Branch.findByIdAndUpdate(id,{

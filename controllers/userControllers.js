@@ -53,7 +53,7 @@ const get_user = async (req, res) => {
 };
 const get_user_ID=async(req,res)=>{
   try{
-      const {id}=req.body;
+      const {id}=req.params;
       if(!id){
         return res.status(statusCodes.BAD_REQUEST).json({message:messages.BAD_REQUEST});
       }
