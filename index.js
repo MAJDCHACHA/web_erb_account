@@ -64,6 +64,8 @@ const app = express();
 dotenv.config();
 const PORT = process.env.PORT || 3001;
 setupSwagger(app);
+app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOption));
