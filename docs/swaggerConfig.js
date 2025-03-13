@@ -67,7 +67,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3001", 
+        url: "https://weberbaccount-production.up.railway.app", 
       },
     ],
     components: {
