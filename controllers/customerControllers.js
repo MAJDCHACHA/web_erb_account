@@ -28,7 +28,7 @@ const get_all_customer=async(req,res)=>{
                 const updatedCustomers = findCustomer.map(customer => {
                     return {
                       ...customer.toObject(),
-                      img: `http://localhost:3001/uploads/images/${customer.img.split('\\').pop()}`
+                      img: `https://weberbaccount-production.up.railway.app/uploads/images/${customer.img.split('\\').pop()}`
                     };
                   });
                 return res.status(statusCodes.SUCCESS).json({message:messages.SUCCESS,data:updatedCustomers});
