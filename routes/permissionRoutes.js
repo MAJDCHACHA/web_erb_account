@@ -2,7 +2,7 @@ import express from 'express';
 import  PermissionController from '../controllers/permissionControllers.js';
 import verify from '../middleware/verify.js'
 const router=express.Router();
-router.use(verify);
+// router.use(verify);
 router.route('/add').post(PermissionController.create_permission);
 router.route('/get').get(PermissionController.get_permission);
 router.route('/edit').put(PermissionController.update_permission);

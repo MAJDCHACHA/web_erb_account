@@ -3,11 +3,10 @@ import { statusCodes } from "../utils/statusCodes.js";
 import { messages } from "../utils/messages.js";
 const create_account = async (req, res) => {
   try {
-    const { name, code,parent, accountType, branchId, currency, userId } =
+    const { name,parent, accountType, branchId, currency, userId } =
       req.body;
     if (
       !name ||
-      !code ||
       !accountType ||
       !branchId ||
       !currency ||
@@ -17,7 +16,7 @@ const create_account = async (req, res) => {
         .status(statusCodes.BAD_REQUEST)
         .json({ messages: messages.BAD_REQUEST });
     }
-    const find_account = await Account.findOne({ name });
+    const find_account = await Account.findOne({ name,branchId});
     if (find_account) {
       return res
         .status(statusCodes.SUCCESS)
@@ -25,7 +24,6 @@ const create_account = async (req, res) => {
     }
     const new_account=await Account.create({
         name:name,
-        code:code,
         parent:parent,
         accountType:accountType,
         currency:currency,
@@ -76,17 +74,31 @@ const get_account = async (req, res) => {
 };
 const get_account_ByID = async (req, res) => {
   try {
-    const { id } = req.body;
-    if (!id)
+    const { branchId } = req.params;   
+    if (!branchId) {
       return res
         .status(statusCodes.BAD_REQUEST)
         .json({ message: messages.BAD_REQUEST });
-    const findOne = await Account.findById(id);
-    if (!findOne)
-      return res
-        .status(statusCodes.NO_CONTENT)
-        .json({ message: messages.NO_CONTENT });
-    return res.status(statusCodes.SUCCESS).json({ data: findOne });
+    }
+
+    
+    const accounts = await Account.find({ branchId }).sort({ code: 1 });
+    const accountMap = {};
+    accounts.forEach(account => {
+      accountMap[account._id] = { ...account._doc, children: [] };
+    });
+    const tree = [];
+    accounts.forEach(account => {
+      if (account.parent) {      
+        if (accountMap[account.parent]) {
+          accountMap[account.parent].children.push(accountMap[account._id]);
+        }
+      } else {
+        tree.push(accountMap[account._id]);
+      }
+    });
+
+    return res.status(200).json({ success: true, data: tree });
   } catch (err) {
     return res
       .status(statusCodes.INTERNAL_SERVER_ERROR)

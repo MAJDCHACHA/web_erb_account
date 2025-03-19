@@ -2,7 +2,7 @@
  * @swagger
  * tags:
  *   - name: branch
- *     description: Branch management (add, get, edit, delete).
+ *     description: Branch management (add, get,getAccountTree, edit, delete).
  */
 /**
  * @swagger
@@ -50,6 +50,31 @@
  *         description: No Content
  */
 
+
+/**
+ * @swagger
+ * /api/branch/getAccountTree/{branchId}:  # ✅ تأكد أن الاسم مطابق تمامًا
+ *   get:
+ *     summary: Get account tree by branch ID
+ *     tags: [branch]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: branchId  # ✅ يجب أن يكون مطابقًا تمامًا لما في req.params
+ *         required: true
+ *         schema:
+ *           type: string  # MongoDB GUID هو نص
+ *         description: The GUID of the branch
+ *     responses:
+ *       200:
+ *         description: account_tree found
+ *       400:
+ *         description: Bad Request - Missing or invalid branchId
+ *       404:
+ *         description: account_tree not found
+ */
+
 /**
  * @swagger
  * /api/branch/edit:
@@ -84,7 +109,6 @@
  *       400:
  *         description: Incorrect or incomplete data
  */
-
 
 
 /**

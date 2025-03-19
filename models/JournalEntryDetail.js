@@ -12,6 +12,6 @@ const journalEntrySchema = new mongoose.Schema({
   ],
   userId:{type:mongoose.Schema.Types.ObjectId,ref:"User",required:true}
 }, { timestamps: true,versionKey: false });
-
+ 
 const JournalEntry=mongoose.model("JournalEntry", journalEntrySchema);
 export default JournalEntry;

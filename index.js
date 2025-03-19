@@ -50,26 +50,28 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from 'path'
+import { fileURLToPath } from 'url';
+
 import corsOption from "./config/corsOrigin.js";
 import { connectDB } from "./database/index.js";
-import setupSwagger from "./docs/swaggerConfig.js"; // استدعاء ملف Swagger
-
+import setupSwagger from "./docs/swaggerConfig.js";
 import userRoutes from "./routes/userRoutes.js";
 import permissionRoutes from "./routes/permissionRoutes.js";
 import branchRoutes from "./routes/branchRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import accountRoutes from "./routes/accountRoutes.js";
-
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 dotenv.config();
 const PORT = process.env.PORT || 3001;
 setupSwagger(app);
 app.set('trust proxy', 1);
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads/images', express.static(path.join(__dirname, 'uploads/images')));
 app.use(cors(corsOption));
-
 app.use("/api/auth/user", userRoutes);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/branch", branchRoutes);
@@ -82,8 +84,10 @@ app.get("/", (req, res) => {
 
 connectDB().then(() => {
   app.listen(PORT, () => {
+    console.log(PORT);
     console.log(`server running in port: ${PORT}`);
   });
 }).catch(err => {
   console.error("Failed to start server:", err);
 });
+

@@ -14,5 +14,6 @@ export const messages = {
     NOT_EXIST:`User does not exist`,
     CUSTOMER_EXIST:"Customer Exists",
     PASSWORD_INVALID:"Invalid password",
-    ACCOUNT_EXISTS:`Account already exists`
+    ACCOUNT_EXISTS:`Account already exists`,
+    BRANCH:`branch already exists`
   };

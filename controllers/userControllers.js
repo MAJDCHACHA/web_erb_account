@@ -1,33 +1,45 @@
 import User from "../models/user.js";
-import Branch from '../models/branch.js'
+import Branch from "../models/branch.js";
+import Permission from '../models/permissions.js'
 import { messages } from "../utils/messages.js";
 import { statusCodes } from "../utils/statusCodes.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 
 dotenv.config();
 const create_user = async (req, res) => {
   try {
-    const { name, email, password, role, permissions,branchID } = req.body;
+    const { name, email, password, role, permissions, branchID } = req.body;
     if (!name || !email || !password || !role || !Array.isArray(permissions))
       return res
         .status(statusCodes.BAD_REQUEST)
         .json({ messages: messages.BAD_REQUEST });
-        const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
+        const [branchExists, validPermissions] = await Promise.all([
+          Branch.findById(branchID).lean(), // Faster lookup
+          Permission.find({ _id: { $in: permissions } }).lean(),
+        ]);
+    
+        if (!branchExists) {
+          return res.status(400).json({ message: "Branch does not exist." });
+        }
+    
+        if (validPermissions.length !== permissions.length) {
+          return res.status(400).json({ message: "Some permissions are invalid." });
+        }
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
 
-  const new_user= await User.create({
+    const new_user = await User.create({
       name: name,
       email: email,
       password: hashedPassword,
       role: role,
       permissions: permissions,
-      branchID:branchID
+      branchID: branchID,
     });
-
     return res
       .status(statusCodes.CREATED)
-      .json({ messages: messages.USER_CREATED});
+      .json({ messages: messages.USER_CREATED, data: new_user });
   } catch (err) {
     return res
       .status(statusCodes.INTERNAL_SERVER_ERROR)
@@ -36,12 +48,14 @@ const create_user = async (req, res) => {
 };
 const get_user = async (req, res) => {
   try {
-    const select = await User.find() .populate("permissions", "name -_id")  // لملء أسماء الصلاحيات
-    .populate("branchID", "name -_id");
+    const select = await User.find()
+      .populate("permissions", "name") // لملء أسماء الصلاحيات
+      .populate("branchID", "name");
     if (!select || select.length === 0)
       return res
         .status(statusCodes.NO_CONTENT)
         .json({ messages: messages.NO_CONTENT });
+      
     return res
       .status(statusCodes.SUCCESS)
       .json({ messages: messages.SUCCESS, data: select });
@@ -51,44 +65,63 @@ const get_user = async (req, res) => {
       .json({ messages: messages.INTERNAL_SERVER_ERROR });
   }
 };
-const get_user_ID=async(req,res)=>{
-  try{
-      const {id}=req.params;
-      if(!id){
-        return res.status(statusCodes.BAD_REQUEST).json({message:messages.BAD_REQUEST});
-      }
-      const findByPk=await User.findById(id).populate("permissions", "name")  // لملء أسماء الصلاحيات
-      .populate("branchID", "name");;
-      if(!findByPk || findByPk.length===0){
-        return res.status(statusCodes.NO_CONTENT).json({message:messages.NO_CONTENT});
-      }
-      return res.status(statusCodes.SUCCESS).json({message:messages.SUCCESS,data:findByPk});
-  }
-  catch(err){
-    return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({message:messages.INTERNAL_SERVER_ERROR})
-  }
-}
-const edit_user = async (req, res) => {
+const get_user_ID = async (req, res) => {
   try {
-    const { id,name, email, password, role, permissions, branchID } = req.body;
-
-    // Check if the required fields are present
-    if (!name || !email || !password || !role || !Array.isArray(permissions) || !branchID) {
+    const { id } = req.params;
+    if (!id) {
       return res
         .status(statusCodes.BAD_REQUEST)
-        .json({ message:messages.BAD_REQUEST});
+        .json({ message: messages.BAD_REQUEST });
+    }
+    const findByPk = await User.findById(id)
+      .populate("permissions", "name") // لملء أسماء الصلاحيات
+      .populate("branchID", "name");
+    if (!findByPk || findByPk.length === 0) {
+      return res
+        .status(statusCodes.NO_CONTENT)
+        .json({ message: messages.NO_CONTENT });
+    }
+    return res
+      .status(statusCodes.SUCCESS)
+      .json({ message: messages.SUCCESS, data: findByPk });
+  } catch (err) {
+    return res
+      .status(statusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: messages.INTERNAL_SERVER_ERROR });
+  }
+};
+const edit_user = async (req, res) => {
+  try {
+    const { id, name, email, password, role, permissions, branchID } = req.body;
+
+    // Check if the required fields are present
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !role ||
+      !Array.isArray(permissions) ||
+      !branchID
+    ) {
+      return res
+        .status(statusCodes.BAD_REQUEST)
+        .json({ message: messages.BAD_REQUEST });
     }
 
     // Find user by ID
     const user = await User.findById(id);
     if (!user) {
-      return res.status(statusCodes.NO_CONTENT).json({message:messages.NO_CONTENT});
+      return res
+        .status(statusCodes.NO_CONTENT)
+        .json({ message: messages.NO_CONTENT });
     }
 
     // Check if the email is already used by another user
     const existingUser = await User.findOne({ email });
     if (existingUser && existingUser._id.toString() !== id) {
-      return res.status(400).json({ message: "Email is already in use by another user." });
+      return res
+        .status(400)
+        .json({ message: "Email is already in use by another user." });
     }
 
     // Check if the branch exists
@@ -116,12 +149,13 @@ const edit_user = async (req, res) => {
 
     // Respond with the updated user data
     return res.status(statusCodes.SUCCESS).json({
-      message:messages.SUCCESS,
-      data: user
+      message: messages.SUCCESS,
+      data: user,
     });
-
   } catch (err) {
-    return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    return res
+      .status(statusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 const delete_user = async (req, res) => {
@@ -148,7 +182,9 @@ const login_user = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(statusCodes.BAD_REQUEST).json({ messages: messages.BAD_REQUEST });
+      return res
+        .status(statusCodes.BAD_REQUEST)
+        .json({ messages: messages.BAD_REQUEST });
     }
 
     const findOne = await User.findOne({ email: email })
@@ -156,12 +192,16 @@ const login_user = async (req, res) => {
       .populate("branchID", "name");
 
     if (!findOne) {
-      return res.status(statusCodes.NO_CONTENT).json({ messages: messages.NO_CONTENT });
+      return res
+        .status(statusCodes.NO_CONTENT)
+        .json({ messages: messages.NO_CONTENT });
     }
 
     const isPasswordValid = await bcrypt.compare(password, findOne.password);
     if (!isPasswordValid) {
-      return res.status(statusCodes.UNAUTHORIZED).json({ message: messages.PASSWORD_INVALID });
+      return res
+        .status(statusCodes.UNAUTHORIZED)
+        .json({ message: messages.PASSWORD_INVALID });
     }
 
     const accessToken = jwt.sign(
@@ -182,41 +222,77 @@ const login_user = async (req, res) => {
     return res.status(statusCodes.SUCCESS).json({
       message: messages.SUCCESS,
       data: findOne,
-      accessToken: accessToken
+      accessToken: accessToken,
     });
   } catch (err) {
     console.error(err);
-    return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ messages: err.message });
+    return res
+      .status(statusCodes.INTERNAL_SERVER_ERROR)
+      .json({ messages: err.message });
+  }
+};
+const block_user = async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) {
+      return res
+        .status(statusCodes.BAD_REQUEST)
+        .json({ message: messages.BAD_REQUEST });
+    }
+
+    const findOne = await User.findById(id);
+    if (!findOne) {
+      return res
+        .status(statusCodes.NO_CONTENT)
+        .json({ message: messages.NO_CONTENT });
+    }
+    findOne.isActive = !findOne.isActive;
+    await findOne.save();
+    return res.json({ isActive: findOne.isActive });
+  } catch (err) {
+    return res
+      .status(statusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 const refresh_user = async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) {
-    return res.status(statusCodes.UNAUTHORIZED).json({ message: messages.Unauthorized });
+    return res
+      .status(statusCodes.UNAUTHORIZED)
+      .json({ message: messages.Unauthorized });
   }
 
-  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
-    if (err) {
-      return res.status(statusCodes.FORBIDDEN).json({ message: messages.Forbidden });
-    }
+  jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_SECRET,
+    async (err, decoded) => {
+      if (err) {
+        return res
+          .status(statusCodes.FORBIDDEN)
+          .json({ message: messages.Forbidden });
+      }
 
-    const foundUser = await User.findById(decoded.UserInfo.id);
-    if (!foundUser) {
-      return res.status(statusCodes.UNAUTHORIZED).json({ message: messages.Unauthorized });
-    }
+      const foundUser = await User.findById(decoded.UserInfo.id);
+      if (!foundUser) {
+        return res
+          .status(statusCodes.UNAUTHORIZED)
+          .json({ message: messages.Unauthorized });
+      }
 
-    const accessToken = jwt.sign(
-      {
-        UserInfo: {
-          id: foundUser.id,
+      const accessToken = jwt.sign(
+        {
+          UserInfo: {
+            id: foundUser.id,
+          },
         },
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "1d" }
-    );
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "1d" }
+      );
 
-    return res.json({ accessToken });
-  });
+      return res.json({ accessToken });
+    }
+  );
 };
 const logout_user = async (req, res) => {
   try {
@@ -235,7 +311,9 @@ const logout_user = async (req, res) => {
 
     return res.status(statusCodes.SUCCESS).json({ message: messages.LOGOUT });
   } catch (err) {
-    return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: messages.INTERNAL_SERVER_ERROR });
+    return res
+      .status(statusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: messages.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -245,9 +323,9 @@ export default {
   get_user_ID,
   edit_user,
   delete_user,
+  block_user,
   login_user,
   refresh_user,
-  logout_user
-  
-  
+  logout_user,
 };
+

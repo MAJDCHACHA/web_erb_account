@@ -132,7 +132,7 @@
  *     responses:
  *       200:
  *         description: Successfully retrieved users
- *       204:
+ *       203:
  *         description: No users available
  */
 
@@ -209,6 +209,33 @@
  *         description: User data successfully updated
  *       400:
  *         description: Incorrect or incomplete data
+ */
+
+/**
+ * @swagger
+ * /api/auth/user/block:
+ *   put:
+ *     summary: Edit user data
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 example: "60c72b2f9fd1c4567e123456"
+ *     responses:
+ *       200:
+ *         description:  successfully updated isActive
+ *       400:
+ *         description: Bad request
  */
 
 /**

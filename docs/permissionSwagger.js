@@ -2,7 +2,7 @@
  * @swagger
  * tags:
  *   name: Permissions
- *   description: API for managing permissions
+ *   description:  managing permissions (add,get,edit,delete)
  */
 
 /**

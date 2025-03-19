@@ -3,7 +3,8 @@ import { statusCodes } from "../utils/statusCodes.js";
 import { messages } from "../utils/messages.js";
 const create_customer=async(req,res)=>{
     try{
-        const {nationalId,fullName,phone,img}=req.body;
+        const {nationalId,fullName,phone}=req.body;
+        const img = req.file.path;
         if(!nationalId || !fullName|| !phone ||!img){
             return res.status(statusCodes.BAD_REQUEST).json({message:messages.BAD_REQUEST});
         }
@@ -24,7 +25,13 @@ const get_all_customer=async(req,res)=>{
                 if(!findCustomer || findCustomer.length===0){
                     return res.status(statusCodes.NO_CONTENT).json({message:messages.NO_CONTENT})
                 }
-                return res.status(statusCodes.SUCCESS).json({message:messages.SUCCESS,data:findCustomer});
+                const updatedCustomers = findCustomer.map(customer => {
+                    return {
+                      ...customer.toObject(),
+                      img: `http://localhost:3001/uploads/images/${customer.img.split('\\').pop()}`
+                    };
+                  });
+                return res.status(statusCodes.SUCCESS).json({message:messages.SUCCESS,data:updatedCustomers});
     }
     catch(err){
         return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({message:err.message});
