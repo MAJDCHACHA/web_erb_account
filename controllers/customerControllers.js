@@ -19,24 +19,35 @@ const create_customer=async(req,res)=>{
         return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({message: err.message});
     }
 }
-const get_all_customer=async(req,res)=>{
-    try{
-                const findCustomer=await Customer.find();
-                if(!findCustomer || findCustomer.length===0){
-                    return res.status(statusCodes.NO_CONTENT).json({message:messages.NO_CONTENT})
-                }
-                const updatedCustomers = findCustomer.map(customer => {
-                    return {
-                      ...customer.toObject(),
-                      img: `https://weberbaccount-production.up.railway.app/uploads/images/${customer.img.split('\\').pop()}`
-                    };
-                  });
-                return res.status(statusCodes.SUCCESS).json({message:messages.SUCCESS,data:updatedCustomers});
+const get_all_customer = async (req, res) => {
+    try {
+        const findCustomer = await Customer.find();
+        if (!findCustomer || findCustomer.length === 0) {
+            return res.status(statusCodes.NO_CONTENT).json({ message: messages.NO_CONTENT });
+        }
+
+        const baseUrl = `${req.protocol}://${req.get('host')}`; // رابط السيرفر الأساسي
+
+        const updatedCustomers = findCustomer.map(customer => {
+            let imagePath = customer.img;
+
+            // تأكد من أن الصورة لا تحتوي على مسار مكرر
+            if (!imagePath.startsWith('/uploads/images/')) {
+                imagePath = `/uploads/images/${imagePath.split('/').pop()}`;
+            }
+
+            return {
+                ...customer.toObject(),
+                img: `${baseUrl}${imagePath}`
+            };
+        });
+
+        return res.status(statusCodes.SUCCESS).json({ message: messages.SUCCESS, data: updatedCustomers });
+    } catch (err) {
+        return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: err.message });
     }
-    catch(err){
-        return res.status(statusCodes.INTERNAL_SERVER_ERROR).json({message:err.message});
-    }
-}
+};
+
 const get_customer_ById=async(req,res)=>{
     try{
         const {nationalId}=req.body;
